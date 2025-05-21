@@ -7,13 +7,15 @@ import CallToAction from '../components/CallToAction';
 const Contact = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   
-  const handleSubmit = (e) => {
+  interface ContactFormEvent extends React.FormEvent<HTMLFormElement> {}
+
+  const handleSubmit = (e: ContactFormEvent): void => {
     e.preventDefault();
     // In a real app, you would handle form submission here
-    
+
     // Simulate form submission success
     setFormSubmitted(true);
-    
+
     // Reset form fields if needed
   };
   
@@ -60,7 +62,7 @@ const Contact = () => {
                       <div>
                         <h3 className="font-medium text-lg text-white mb-1">Our Office</h3>
                         <p className="text-gray-300">
-                          Kilimani Business Center, 3rd Floor<br />
+                          Ikigai, Lower Kabete Road<br />
                           Nairobi, Kenya
                         </p>
                       </div>
@@ -156,7 +158,21 @@ const Contact = () => {
                       Let us know how we can help you. We'll get back to you within 24 hours.
                     </p>
                     
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form
+                      name="contact"
+                      method="POST"
+                      data-netlify="true"
+                      data-netlify-honeypot="bot-field"
+                      onSubmit={handleSubmit}
+                      className="space-y-6"
+                    >
+                      <input type="hidden" name="form-name" value="contact" />
+                      <p className="hidden">
+                        <label>
+                          Don’t fill this out: <input name="bot-field" />
+                        </label>
+                      </p>
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Name */}
                         <div>
@@ -321,11 +337,11 @@ const Contact = () => {
             <div className="md:col-span-2 rounded-xl overflow-hidden shadow-soft h-96">
               {/* In a real application, you would use an actual map component */}
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15955.254896198448!2d36.76962324957024!3d-1.2966841936333262!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f10a6a08def89%3A0xe191ac93c4c9f57f!2sKilimani%2C%20Nairobi!5e0!3m2!1sen!2ske!4v1623252342745!5m2!1sen!2ske" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15955.099999999999!2d36.75200000000001!3d-1.2440000000000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f176c1b2e8c8b%3A0x6e6e6e6e6e6e6e6e!2sIkigai%20Westlands%20(Lower%20Kabete)!5e0!3m2!1sen!2ske!4v1716299999999!5m2!1sen!2ske" 
                 width="100%" 
                 height="100%" 
                 style={{ border: 0 }} 
-                allowFullScreen="" 
+                allowFullScreen
                 loading="lazy"
                 title="Nexora Consulting Office Location"
               ></iframe>
@@ -360,20 +376,20 @@ const Contact = () => {
                   <div>
                     <div className="font-medium text-gray-900 dark:text-white mb-1">By Car</div>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      Parking is available in the basement of the Kilimani Business Center. Validation is available for clients.
+                      Parking is available at Ikigai, Lower Kabete. Please check in at the main gate and follow signs to visitor parking.
                     </p>
                   </div>
                   <div>
                     <div className="font-medium text-gray-900 dark:text-white mb-1">By Public Transport</div>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      Several matatu routes stop within a 5-minute walk of our office. The nearest stop is Kilimani Road Junction.
+                      Matatus and buses to Lower Kabete stop near Ikigai. Alight at the Lower Kabete Road junction and walk 3 minutes to the Ikigai campus entrance.
                     </p>
                   </div>
                 </div>
                 
                 <div className="mt-8">
                   <Link 
-                    to="https://goo.gl/maps/2yZ9z7L8D9Q2" 
+                    to="https://goo.gl/maps/6Qw2v7y1nQwXy7pG7" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="inline-flex items-center text-primary-600 dark:text-primary-400 font-medium hover:text-primary-800 dark:hover:text-primary-300"

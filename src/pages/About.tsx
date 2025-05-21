@@ -107,7 +107,7 @@ const About = () => {
                 
                 {/* Timeline overlay */}
                 <div className="absolute -bottom-8 -right-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-medium text-center w-40">
-                  <div className="font-heading text-2xl font-bold text-primary-600 dark:text-primary-400">2025</div>
+                  <div className="font-heading text-2xl font-bold text-primary-600 dark:text-primary-400">2024</div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Year Founded</div>
                 </div>
               </div>

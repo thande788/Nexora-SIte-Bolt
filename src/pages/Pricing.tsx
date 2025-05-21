@@ -1,49 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Disclosure } from '@headlessui/react';
-import { ChevronDown, Check, Star, Users, PieChart, BarChart3, Shield, BrainCircuit, Layers, Zap, X, Gift } from 'lucide-react';
+import { ChevronDown, Check, Star, Users, PieChart, BarChart3, Shield, BrainCircuit, Layers, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import CallToAction from '../components/CallToAction';
 import clsx from 'clsx';
-
-// Dummy CalendlyModal component for demo/fix
-const CalendlyModal = ({
-  open,
-  plan,
-  onClose,
-}: {
-  open: boolean;
-  plan?: string;
-  onClose: () => void;
-}) => {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-8 max-w-lg w-full relative">
-        <button
-          className="absolute top-3 right-3 text-gray-400 hover:text-red-500"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-        </button>
-        <h2 className="text-xl font-bold mb-2">Book a Demo</h2>
-        <p className="mb-4">Calendly booking for plan: <span className="font-semibold">{plan}</span></p>
-        <div className="bg-gray-100 dark:bg-gray-800 rounded p-4 text-center text-gray-500 dark:text-gray-300">
-          Calendly widget would appear here.
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const BILLING_OPTIONS = [
   { label: 'Monthly', value: 'monthly', discount: 0 },
   { label: 'Annual (10% off)', value: 'annual', discount: 0.10 },
 ];
-
-const LAUNCH_OFFER = {
-  text: '20% off for the first 3 months!',
-  className: 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold ml-2',
-};
 
 const services = [
   {
@@ -336,346 +301,32 @@ function formatPrice(price: number, billing: string, period: string) {
   );
 }
 
-
-const PREMIUM_SERVICES = [
-  { name: 'Finance + Forecasting', key: 'finance' },
-  { name: 'Ops + Optimization', key: 'ops' },
-  { name: 'ESG+ Reporting', key: 'esg' },
-  { name: 'Talent Insights Pro', key: 'hr' },
-];
-
-const BASE_SERVICES = [
-  'Standard Finance',
-  'Process Review',
-  'ESG Starter',
-  'Smart Hire',
-];
-
-interface CartItem {
-  name: string;
-  type: 'service' | 'bundle' | 'addon';
-  price: number;
-  period?: string;
-  [key: string]: any;
+function ribbonClass(badge: string): string {
+  switch (badge) {
+    case 'Best Value':
+      return 'bg-green-500';
+    case 'Popular':
+      return 'bg-primary-600';
+    default:
+      return 'bg-gray-500';
+  }
 }
-
-interface BundleMapEntry {
-  name: string;
-  price: number;
-  match: (cart: CartItem[]) => boolean;
-  bundleObj: typeof bundles[number] | undefined;
-  message: string;
+function ribbonText(badge: string): string {
+  switch (badge) {
+    case 'Best Value':
+      return 'Best Value';
+    case 'Popular':
+      return 'Popular';
+    default:
+      return badge;
+  }
 }
-
-const BUNDLE_MAP: BundleMapEntry[] = [
-  {
-    name: 'Growth Starter',
-    price: 39000,
-    match: (cart: CartItem[]) => {
-      // Any 2 base-tier services
-      const baseServices = cart.filter(i => i.type === 'service' && BASE_SERVICES.includes(i.name));
-      return baseServices.length === 2;
-    },
-    bundleObj: bundles.find(b => b.name === 'Growth Starter'),
-    message: 'Bundle applied: Growth Starter – 2 services for KES 39,000',
-  },
-  {
-    name: 'SmartOps Suite',
-    price: 77000,
-    match: (cart: CartItem[]) => {
-      // Any 3 premium services
-      const premium = cart.filter(i => i.type === 'service' && PREMIUM_SERVICES.map(s => s.name).includes(i.name));
-      return premium.length === 3;
-    },
-    bundleObj: bundles.find(b => b.name === 'SmartOps Suite'),
-    message: 'Bundle applied: SmartOps Suite – 3 premium services for KES 77,000',
-  },
-  {
-    name: 'Impact Pro',
-    price: 92000,
-    match: (cart: CartItem[]) => {
-      // Finance+, ESG+, HR Pro
-      const names = cart.filter(i => i.type === 'service').map(i => i.name);
-      return (
-        names.includes('Finance + Forecasting') &&
-        names.includes('ESG+ Reporting') &&
-        names.includes('Talent Insights Pro')
-      );
-    },
-    bundleObj: bundles.find(b => b.name === 'Impact Pro'),
-    message: 'Bundle applied: Impact Pro – Finance+, ESG+, HR Pro for KES 92,000',
-  },
-  {
-    name: 'Compliance360',
-    price: 129000,
-    match: (cart: CartItem[]) => {
-      // All 4 premium services
-      const names = cart.filter(i => i.type === 'service').map(i => i.name);
-      return PREMIUM_SERVICES.every(s => names.includes(s.name));
-    },
-    bundleObj: bundles.find(b => b.name === 'Compliance360'),
-    message: 'Bundle applied: Compliance360 – All premium services for KES 129,000',
-  },
-];
 
 const Pricing = () => {
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
   const [tab, setTab] = useState<'services' | 'bundles' | 'enterprise' | 'addons'>('services');
-  const [cart, setCart] = useState<any[]>([]);
-  const [showCart, setShowCart] = useState(false);
   const [showCalendly, setShowCalendly] = useState<{ open: boolean; plan?: string }>({ open: false });
-  const [cartWarning, setCartWarning] = useState<string | null>(null);
-  const [bundleApplied, setBundleApplied] = useState<{ name: string; message: string; icon: JSX.Element } | null>(null);
-  const [bundleToast, setBundleToast] = useState<string | null>(null);
 
-  // Helper: get base plan (service or bundle)
-  const getBasePlan = () => cart.find(i => i.type === 'service' || i.type === 'bundle');
-  const getAddOns = () => cart.filter(i => i.type === 'addon');
-
-  // --- Smart Bundle Auto-Matching Logic ---
-  useEffect(() => {
-    const baseServices = cart.filter(item => item.type === 'service' && !item.premium);
-    const premiumServices = cart.filter(item => item.type === 'service' && item.premium);
-    const addOns = getAddOns();
-
-    function applyBundle(
-      bundleName: string,
-      bundlePrice: number,
-      replacedItems: any[]
-    ): void {
-      setCart([
-        ...cart.filter((item: any) => !replacedItems.includes(item) && item.type !== 'bundle'),
-        { name: bundleName, type: 'bundle', price: bundlePrice }
-      ]);
-      setBundleApplied({
-        name: bundleName,
-        message: `Bundle applied: ${bundleName} for KES ${bundlePrice.toLocaleString()}`,
-        icon: <Gift className="inline-block text-accent-600 mr-1" size={18} />,
-      });
-      setBundleToast(`Bundle applied: ${bundleName} for KES ${bundlePrice.toLocaleString()}`);
-      setTimeout(() => setBundleToast(null), 2500);
-    }
-
-    // Bundle: Growth Starter
-    if (baseServices.length === 2) {
-      const isAlreadyBundled = cart.some(item => item.name === 'Growth Starter Bundle');
-      if (!isAlreadyBundled) {
-        applyBundle('Growth Starter Bundle', 39000, baseServices);
-      }
-    }
-
-    // Bundle: SmartOps Suite
-    if (premiumServices.length >= 3) {
-      const isAlreadyBundled = cart.some(item => item.name === 'SmartOps Suite');
-      if (!isAlreadyBundled) {
-        applyBundle('SmartOps Suite', 77000, premiumServices);
-      }
-    }
-
-    // Bundle: Impact Pro (Finance+, ESG+, HR Pro)
-    const hasImpactPro = ['Finance+ Forecasting', 'ESG+ Reporting', 'Talent Insights Pro']
-      .every(service => cart.some(item => item.name === service));
-    if (hasImpactPro && !cart.some(item => item.name === 'Impact Pro')) {
-      applyBundle('Impact Pro', 92000, premiumServices);
-    }
-
-    // Bundle: Compliance360 (all 4 top-tier services)
-    const hasCompliance360 = ['Finance+ Forecasting', 'ESG+ Reporting', 'Talent Insights Pro', 'Ops+ Optimization']
-      .every(service => cart.some(item => item.name === service));
-    if (hasCompliance360 && !cart.some(item => item.name === 'Compliance360')) {
-      applyBundle('Compliance360', 129000, premiumServices);
-    }
-
-  }, [cart]);
-
-  // --- Cart logic: only one base plan (service or bundle), can't mix ---
-  const addToCart = (item: any, type: 'service' | 'bundle' | 'addon') => {
-    setShowCart(true);
-    setCartWarning(null);
-
-    // Prevent adding individual services if bundle is applied
-    if (cart.some(i => i.type === 'bundle') && type === 'service') {
-      setCartWarning('You cannot add individual services when a bundle is active.');
-      return;
-    }
-    // Prevent adding a bundle if services are present
-    if (type === 'bundle' && cart.some(i => i.type === 'service')) {
-      setCartWarning('You cannot add a bundle when services are selected. Remove services first.');
-      return;
-    }
-    // Only one service per category
-    if (type === 'service') {
-      const category = services.find((cat) =>
-        cat.plans.some((plan) => plan.name === item.name)
-      )?.category;
-      const filtered = cart.filter(
-        (i) =>
-          i.type !== 'service' ||
-          services.find((cat) =>
-            cat.plans.some((plan) => plan.name === i.name)
-          )?.category !== category
-      );
-      setCart([...filtered, { ...item, type }]);
-    } else if (type === 'bundle') {
-      setCart([...cart.filter((i) => i.type === 'addon'), { ...item, type }]);
-    } else {
-      // Add-on: allow multiple, but no duplicates, soft cap at 3
-      if (getAddOns().length >= 3) {
-        setCartWarning('You can add up to 3 add-ons. Remove one to add another.');
-        return;
-      }
-      setCart((prev) =>
-        prev.some((i) => i.name === item.name && i.type === 'addon')
-          ? prev
-          : [...prev, { ...item, type }]
-      );
-    }
-  };
-
-  const removeFromCart = (name: string, type: string) => {
-    setCart((prev) => prev.filter((i) => !(i.name === name && i.type === type)));
-    setCartWarning(null);
-  };
-
-  const clearCart = () => {
-    setCart([]);
-    setCartWarning(null);
-  };
-
-  // --- Calculate total: base plan (service(s) or bundle) + all add-ons ---
-  const calculateCartTotal = (cartItems: any[]): number => {
-    return cartItems.reduce((sum: number, item: any) => sum + item.price, 0);
-  };
-
-  // --- Subscribe button logic ---
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!getBasePlan() && !cart.some(i => i.type === 'bundle')) {
-      setCartWarning('Please choose a base plan.');
-      return;
-    }
-    alert('Submitted! (Demo only)');
-  };
-
-  // --- Cart Table Layout ---
-  const CartTable = () => (
-    <div className="w-full">
-      {bundleApplied && (
-        <div className="flex items-center mb-2 text-accent-700 bg-accent-50 dark:bg-accent-900/20 px-3 py-2 rounded transition-all">
-          {bundleApplied.icon}
-          <span className="font-semibold text-sm">{bundleApplied.message}</span>
-        </div>
-      )}
-      {bundleToast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-accent-600 text-white px-4 py-2 rounded shadow-lg transition-all animate-fade-in">
-          {bundleToast}
-        </div>
-      )}
-      <div className="overflow-x-auto">
-        <table className="table-auto min-w-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded text-sm mb-2">
-          <thead>
-            <tr className="bg-gray-100 dark:bg-gray-800">
-              <th className="px-2 py-2 border-b text-left">Item Name</th>
-              <th className="px-2 py-2 border-b text-left">Type</th>
-              <th className="px-2 py-2 border-b text-right">Price</th>
-              <th className="px-2 py-2 border-b"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {cart.map(item => (
-              <tr key={item.name} className="border-b last:border-b-0">
-                <td className="px-2 py-2">{item.name}</td>
-                <td className="px-2 py-2 capitalize">{item.type === 'bundle' ? 'Bundle' : item.type}</td>
-                <td className="px-2 py-2 text-right font-mono text-xs">
-                  {item.price.toLocaleString()}
-                  <span className="ml-1 text-gray-500 dark:text-gray-400 font-normal">
-                    {item.period === 'one-time' ? 'one-time' : '/month'}
-                  </span>
-                </td>
-                <td className="px-2 py-2 text-right">
-                  <button
-                    onClick={() => removeFromCart(item.name, item.type)}
-                    className="text-gray-400 hover:text-red-500"
-                    aria-label="Remove"
-                    disabled={item.type === 'bundle'}
-                  >
-                    <X size={14} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="bg-gray-100 dark:bg-gray-800 font-semibold">
-              <td colSpan={3}>Total</td>
-              <td>
-                KES {calculateCartTotal(cart).toLocaleString()}
-                <span className="ml-1 text-gray-500 dark:text-gray-400 font-normal">
-                  /month
-                </span>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      <button
-        className="w-full mb-2 py-2 px-4 bg-red-50 hover:bg-red-100 text-red-700 font-semibold rounded-lg transition"
-        onClick={clearCart}
-      >
-        Clear Cart
-      </button>
-      <form
-        name="nexora-subscribe"
-        method="POST"
-        data-netlify="true"
-        hidden={cart.length === 0}
-        onSubmit={handleSubscribe}
-        className="mt-1"
-      >
-        <input type="hidden" name="form-name" value="nexora-subscribe" />
-        <input type="hidden" name="basePlan" value={getBasePlan() ? JSON.stringify(getBasePlan()) : ''} />
-        <input type="hidden" name="addons" value={JSON.stringify(getAddOns())} />
-        <input type="hidden" name="total" value={calculateCartTotal(cart)} />
-        <button
-          type="submit"
-          className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition disabled:opacity-50"
-          disabled={!getBasePlan() && !cart.some(i => i.type === 'bundle')}
-        >
-          Subscribe
-        </button>
-      </form>
-      {cartWarning && (
-        <div className="mt-2 text-xs text-red-600 bg-red-50 dark:bg-red-900/30 rounded px-2 py-1">{cartWarning}</div>
-      )}
-      {!getBasePlan() && !cart.some(i => i.type === 'bundle') && (
-        <div className="mt-2 text-xs text-yellow-700 bg-yellow-50 dark:bg-yellow-900/30 rounded px-2 py-1">
-          Please choose a base plan.
-        </div>
-      )}
-    </div>
-  );
-
-  function ribbonClass(badge: string): import("clsx").ClassValue {
-    switch (badge) {
-      case 'Best Value':
-        return 'bg-green-500';
-      case 'Popular':
-        return 'bg-primary-600';
-      default:
-        return 'bg-gray-500';
-    }
-  }
-  function ribbonText(badge: string): import("react").ReactNode {
-    switch (badge) {
-      case 'Best Value':
-        return 'Best Value';
-      case 'Popular':
-        return 'Popular';
-      default:
-        return badge;
-    }
-  }
-  // --- UI ---
   return (
     <div className="bg-white dark:bg-gray-900">
       {/* Hero */}
@@ -847,12 +498,12 @@ const Pricing = () => {
                       )}
                     </Disclosure>
                     <div className="p-6 pt-2 mt-auto flex flex-col gap-2">
-                      <button
-                        className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition"
-                        onClick={() => addToCart(plan, 'service')}
+                      <Link
+                        to="/contact"
+                        className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition text-center"
                       >
                         Add to Plan
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 ))
@@ -932,12 +583,12 @@ const Pricing = () => {
                     )}
                   </Disclosure>
                   <div className="p-6 pt-2 mt-auto flex flex-col gap-2">
-                    <button
-                      className="w-full py-2 px-4 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition"
-                      onClick={() => addToCart(bundle, 'bundle')}
+                    <Link
+                      to="/contact"
+                      className="w-full py-2 px-4 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition text-center"
                     >
                       Add to Plan
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -994,18 +645,12 @@ const Pricing = () => {
                     )}
                   </Disclosure>
                   <div className="p-6 pt-2 mt-auto flex flex-col gap-2">
-                    <button
-                      className="w-full py-2 px-4 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg transition"
-                      onClick={() => setShowCalendly({ open: true, plan: plan.name })}
+                    <Link
+                      to="/contact"
+                      className="w-full py-2 px-4 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg transition text-center"
                     >
                       Book a Demo
-                    </button>
-                    <button
-                      className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition"
-                      onClick={() => { addToCart(plan, 'service'); }}
-                    >
-                      Add to Plan
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -1056,12 +701,12 @@ const Pricing = () => {
                     )}
                   </Disclosure>
                   <div className="p-6 pt-2 mt-auto flex flex-col gap-2">
-                    <button
-                      className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition"
-                      onClick={() => addToCart(addon, 'addon')}
+                    <Link
+                      to="/contact"
+                      className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition text-center"
                     >
                       Add to Plan
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -1069,30 +714,6 @@ const Pricing = () => {
           )}
         </div>
       </section>
-
-      {/* Cart/Plan Summary */}
-      {/* Responsive cart: Drawer on mobile, sticky on desktop */}
-      {showCart && (
-        <div className="fixed inset-0 z-50 flex justify-end md:static md:w-96">
-          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md bg-white dark:bg-gray-900 h-full shadow-xl p-4 overflow-y-auto relative">
-            <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-red-500"
-              onClick={() => setShowCart(false)}
-              aria-label="Close"
-            >
-              <X size={20} />
-            </button>
-            <CartTable />
-          </div>
-        </div>
-      )}
-
-      {/* Calendly Modal */}
-      <CalendlyModal
-        open={showCalendly.open}
-        plan={showCalendly.plan}
-        onClose={() => setShowCalendly({ open: false })}
-      />
 
       <CallToAction
         title="Not Sure Which Plan Is Right for You?"
